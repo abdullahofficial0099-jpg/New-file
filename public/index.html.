@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Payment</title>
+<style>
+:root{--bg:#0F1A2B;--panel:#15223A;--panel2:#1C2C48;--ink:#EAF0FA;--ink-dim:#93A2C2;--line:#263656;--accent:#2FD9B8;--accent-ink:#06261F;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;}
+.wrap{max-width:460px;margin:0 auto;padding:24px 18px 50px;}
+h1{font-size:17px;margin:0 0 18px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;}
+.card h3{margin:0 0 4px;font-size:14.5px;}
+.card p{margin:0 0 14px;color:var(--ink-dim);font-size:12px;line-height:1.5;}
+.detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+.detail-row:last-child{border-bottom:none;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:12px;color:var(--ink-dim);margin-bottom:6px;}
+.field input,.field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:13.5px;color:var(--ink);}
+.btn{width:100%;padding:13px;border-radius:10px;border:none;font-size:14.5px;font-weight:600;cursor:pointer;background:var(--accent);color:var(--accent-ink);}
+.btn:disabled{opacity:.5;}
+.msg{margin-top:12px;font-size:13px;padding:10px;border-radius:8px;display:none;}
+.msg.ok{background:rgba(47,217,184,.15);color:var(--accent);display:block;}
+.msg.err{background:rgba(255,122,89,.15);color:#FF7A59;display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Order Payment Submit Karein</h1>
+
+  <div class="card">
+    <h3>Payment Details</h3>
+    <div class="detail-row"><span>SadaPay — JAVED JARMAYA</span><b>03140552007</b></div>
+    <div class="detail-row"><span>Easypaisa — MUHAMMAD WALI SHEIKH</span><b>03272175294</b></div>
+    <p style="margin-top:12px">Payment bhejne ke baad neeche form fill karein.</p>
+  </div>
+
+  <div class="card">
+    <h3>Apni Details Bharein</h3>
+    <form id="orderForm">
+      <div class="field"><label>Naam</label><input name="customer_name" required></div>
+      <div class="field"><label>Phone / WhatsApp</label><input name="phone" required></div>
+      <div class="field"><label>Order Amount (Rs)</label><input name="amount" type="number"></div>
+      <div class="field"><label>Payment Method</label>
+        <select name="method" required>
+          <option value="SadaPay">SadaPay</option>
+          <option value="Easypaisa">Easypaisa</option>
+        </select>
+      </div>
+      <div class="field"><label>Transaction ID</label><input name="transaction_id" required></div>
+      <div class="field"><label>Screenshot (optional)</label><input name="screenshot" type="file" accept="image/*"></div>
+      <button class="btn" type="submit">Submit Karein</button>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('orderForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button');
+  const msg = document.getElementById('msg');
+  btn.disabled = true; btn.textContent = 'Bheja ja raha hai...';
+  try {
+    const res = await fetch('/api/orders', { method: 'POST', body: new FormData(form) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Error');
+    msg.className = 'msg ok';
+    msg.textContent = 'Submit ho gaya! Aapka order reference: ' + data.order_ref + '. Jald verify ho jayega.';
+    form.reset();
+  } catch (err) {
+    msg.className = 'msg err';
+    msg.textContent = err.message;
+  }
+  btn.disabled = false; btn.textContent = 'Submit Karein';
+});
+</script>
+</body>
+</html>
